@@ -15,17 +15,15 @@ from panda3d.core import CollisionHandlerQueue, CollisionRay
 from panda3d.core import CollisionHandlerPusher, CollisionSphere
 from panda3d.core import Filename, AmbientLight, DirectionalLight
 from panda3d.core import PandaNode, NodePath, Camera, TextNode
-from panda3d.core import CollideMask, loadPrcFileData
+from panda3d.core import CollideMask, loadPrcFileData, WindowProperties
 from direct.gui.OnscreenText import OnscreenText
 from direct.actor.Actor import Actor
 from direct.task.TaskManagerGlobal import taskMgr
+from browser import console, window
 import random
 import sys
 import os
 import math
-
-from browser import console
-console.log(sys.version)
 
 loadPrcFileData("", "default-model-extension .bam")
 
@@ -46,6 +44,8 @@ class RoamingRalphDemo(ShowBase):
     def __init__(self):
         # Set up the window, camera, etc.
         ShowBase.__init__(self)
+
+        window.addEventListener("resize", self.update_window_size)
 
         # This is used to store which keys are currently pressed.
         self.keyMap = {
@@ -295,7 +295,21 @@ class RoamingRalphDemo(ShowBase):
         self.camera.lookAt(self.floater)
 
         return task.cont
+    
+    def update_window_size(self):
+        width = window.innerWidth
+        height = window.innerHeight
+
+        wp = WindowProperties()
+        wp.setSize(width, height)
+        self.win.requestProperties(wp)
+
+        self.camLens.setAspectRatio(width / height)
 
 
 demo = RoamingRalphDemo()
-# demo.run()
+
+# Wait for one tick before updating size
+for _ in range(1):
+    demo.taskMgr.step()
+demo.update_window_size()
