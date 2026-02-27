@@ -1,0 +1,9 @@
+[game]
+# Displayed name
+name        = "My ursina game"
+# Icon of the application
+icon        = "assets/logo_lowres.png"
+
+[application]
+# Main python file of the game
+startfile   = "src/__main__.py"

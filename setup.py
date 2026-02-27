@@ -1,8 +1,19 @@
 from direct.dist import FreezeTool
-import sys, os
+import sys, os, shutil
+import tomllib
 
 if sys.version_info[:2] != (3, 13):
     sys.exit("Run this with Python 3.13, or edit this script")
+
+content: dict = dict()
+with open("project/settings.toml", "rb") as file:
+    content = tomllib.load(file)
+
+# [game] part
+app_name_set: str      = content["game"]["name"]
+app_icon: str          = content["game"]["icon"]
+# [application] part
+app_pyfile: str        = content["application"]["startfile"]
 
 # Thirdparty libraries
 THIRDPARTY_DIR = "./project/emscripten/emscripten-libs"
@@ -128,12 +139,8 @@ class EmscriptenEnvironment:
 freezer = FreezeTool.Freezer()
 freezer.frozenMainCode = """
 #include "project/cpp/game.cpp"
-
 int Py_FrozenMain(int argc, char **argv)
 {
-    fprintf(stdout, "Hello from Paolog_ !!! If you see this message, at the time of writing this, I'm really tired of making C++ shit. Please someone help me.\\n");
-    fprintf(stdout, "Goodbye, my friend who reads the console !!\\n");
-
     EM_ASM({
         Module.setStatus('Starting Python...');
         window.setTimeout(_loadPython, 0);
@@ -152,7 +159,25 @@ freezer.cenv = EmscriptenEnvironment()
 freezer.excludeModule('doctest')
 freezer.excludeModule('difflib')
 freezer.excludeModule('panda3d')
-freezer.addModule('__main__', filename="src/__main__.py")
+freezer.addModule('__main__', filename=app_pyfile)
 
-freezer.done(addStartupModules=True)
-freezer.generateCode("roaming-ralph", compileToExe=True)
+#freezer.done(addStartupModules=True)
+#freezer.generateCode("game", compileToExe=True)
+
+built_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "built")
+if not os.path.exists(built_path):
+    os.mkdir(built_path)
+
+shutil.move("game.data", os.path.join(built_path, "game.data"))
+shutil.move("game.js", os.path.join(built_path, "game.js"))
+shutil.move("game.wasm", os.path.join(built_path, "game.wasm"))
+shutil.copy(app_pyfile, os.path.join(built_path, os.path.basename(app_icon)))
+
+with open("assets/index.html", "r") as file:
+    content = file.read()
+    
+    content = content.replace("{{TITLE}}", app_name_set)
+    content = content.replace("{{LOGO}}", os.path.basename(app_icon))
+
+    new_file = open(os.path.join(built_path, "index.html"), "w")
+    new_file.write(content)

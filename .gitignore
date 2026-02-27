@@ -1,5 +1,3 @@
-roaming-ralph.data
-roaming-ralph.js
-roaming-ralph.wasm
 project/emscripten
 src/ursina
+built
