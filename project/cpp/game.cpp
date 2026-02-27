@@ -6,6 +6,7 @@
 
 extern PyObject *PyInit_core();
 extern PyObject *PyInit_direct();
+//extern PyObject *PyInit_physics();
 
 extern void init_libOpenALAudio();
 extern void init_libpnmimagetypes();
@@ -25,7 +26,7 @@ EMSCRIPTEN_KEEPALIVE void loadPython() {
 
     PyStatus status = Py_InitializeFromConfig(&config);
     if (!PyStatus_Exception(status)) {
-        fprintf(stderr, "Python %s\\n", Py_GetVersion());
+        fprintf(stdout, "Python %s\\n", Py_GetVersion());
 
         EM_ASM({
             Module.setStatus('Importing Panda3D...');
@@ -40,18 +41,24 @@ EMSCRIPTEN_KEEPALIVE void loadPanda() {
     PyModule_AddStringConstant(panda3d_module, "__package__", "panda3d");
     PyModule_AddObject(panda3d_module, "__path__", PyList_New(0));
 
+    PyObject *sys_modules = PySys_GetObject("modules");
+    PyDict_SetItemString(sys_modules, "panda3d", panda3d_module);
+
     PyObject *panda3d_dict = PyModule_GetDict(panda3d_module);
 
     PyObject *core_module = PyInit_core();
+    PyModule_AddStringConstant(core_module, "__name__", "panda3d.core");
     PyDict_SetItemString(panda3d_dict, "core", core_module);
+    PyDict_SetItemString(sys_modules, "panda3d.core", core_module);
 
     PyObject *direct_module = PyInit_direct();
+    PyModule_AddStringConstant(direct_module, "__name__", "panda3d.direct");
     PyDict_SetItemString(panda3d_dict, "direct", direct_module);
+    PyDict_SetItemString(sys_modules, "panda3d.direct", direct_module);
 
     //PyObject *physics_module = PyInit_physics();
     //PyDict_SetItemString(panda3d_dict, "physics", physics_module);
 
-    PyObject *sys_modules = PySys_GetObject("modules");
     PyDict_SetItemString(sys_modules, "panda3d.core", core_module);
     PyDict_SetItemString(sys_modules, "panda3d.direct", direct_module);
 
@@ -64,22 +71,19 @@ EMSCRIPTEN_KEEPALIVE void loadPanda() {
 
     EM_ASM({
         Module.setStatus('Done!');
+        window.setTimeout(_runGame, 0);
     });
+}
+
+EMSCRIPTEN_KEEPALIVE void runGame() {
+    if (PyImport_ImportFrozenModule("__main__") < 0) {
+        PyErr_Print();
+    } else {
+        emscripten_set_main_loop(&task_manager_poll, 0, 0);
+    }
 }
 
 EMSCRIPTEN_KEEPALIVE void stopPythonCode() {
     emscripten_cancel_main_loop();
     PyRun_SimpleString("import builtins, gc, sys\\nsys.modules.pop('__main__', None)\\nsys.modules.pop('direct.directbase.DirectStart', None)\\nif hasattr(builtins, 'base'):\\n    base.taskMgr.destroy()\\n    base.destroy()\\nif hasattr(builtins, 'cpMgr'):\\n    while cpMgr.get_num_explicit_pages():\\n        cpMgr.delete_explicit_page(cpMgr.get_explicit_page(0))\\nif hasattr(builtins, 'base'):\\n    del builtins.base\\nif hasattr(builtins, 'taskMgr'):\\n    del builtins.taskMgr\\ngc.collect()\\n");
-}
-
-EMSCRIPTEN_KEEPALIVE void runPythonCode(char *codeToExecute) {
-    if (PyRun_SimpleString(codeToExecute)) {
-        // An exception occurred.
-        stopPythonCode();
-    } else {
-        emscripten_set_main_loop(&task_manager_poll, 0, 0);
-        EM_ASM({
-            document.getElementById('stop-button').disabled = false;
-        });
-    }
 }
