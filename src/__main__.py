@@ -1,3 +1,5 @@
+from setup_ursina_android import setup_ursina_android
+setup_ursina_android()
 from ursina import *
 from browser import window as htmlwindow
 

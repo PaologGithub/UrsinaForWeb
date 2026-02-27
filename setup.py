@@ -48,6 +48,8 @@ PRELOAD_FILES = []
 
 for root, dirs, files in os.walk("assets"):
     for file in files:
+        if file == "index.html":
+            continue
         PRELOAD_FILES.append(os.path.join(root, file))
 
 
@@ -161,12 +163,13 @@ freezer.excludeModule('difflib')
 freezer.excludeModule('panda3d')
 freezer.addModule('__main__', filename=app_pyfile)
 
-#freezer.done(addStartupModules=True)
-#freezer.generateCode("game", compileToExe=True)
+freezer.done(addStartupModules=True)
+freezer.generateCode("game", compileToExe=True)
 
 built_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "built")
 if not os.path.exists(built_path):
     os.mkdir(built_path)
+
 
 shutil.move("game.data", os.path.join(built_path, "game.data"))
 shutil.move("game.js", os.path.join(built_path, "game.js"))
