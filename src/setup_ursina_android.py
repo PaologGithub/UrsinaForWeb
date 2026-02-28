@@ -39,12 +39,15 @@ def finish():
     from ursina import application
     from pathlib import Path
 
-    ursina_assets = Path("ursina_assets")
-    game_assets = Path("game_assets")
+    ursina_assets = Path("assets") / "ursina_assets"
+    game_assets = Path("assets") / "game_assets"
 
     application.package_folder = ursina_assets
     application.asset_folder = game_assets
 
+    application.scenes_folder = game_assets / 'scenes/'
+    application.scripts_folder = game_assets / 'scripts/'
+    application.fonts_folder = game_assets / 'fonts/'
 
     # Reset the sub paths
     application.internal_models_folder = ursina_assets / 'models/'

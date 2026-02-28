@@ -174,7 +174,7 @@ if not os.path.exists(built_path):
 shutil.move("game.data", os.path.join(built_path, "game.data"))
 shutil.move("game.js", os.path.join(built_path, "game.js"))
 shutil.move("game.wasm", os.path.join(built_path, "game.wasm"))
-shutil.copy(app_pyfile, os.path.join(built_path, os.path.basename(app_icon)))
+shutil.copy(app_icon, os.path.join(built_path, os.path.basename(app_icon)))
 
 with open("assets/index.html", "r") as file:
     content = file.read()

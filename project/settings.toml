@@ -2,7 +2,7 @@
 # Displayed name
 name        = "My ursina game"
 # Icon of the application
-icon        = "assets/logo_lowres.png"
+icon        = "assets/logo.png"
 
 [application]
 # Main python file of the game

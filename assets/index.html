@@ -15,7 +15,6 @@
             font-family: Arial, sans-serif;
         }
 
-        /* Fullscreen canvas */
         #canvas {
             position: fixed;
             top: 0;
@@ -28,22 +27,33 @@
             cursor: default;
         }
 
-        /* Overlay container */
         #overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none; /* allow clicks to pass to canvas */
+            pointer-events: none;
             z-index: 10;
         }
 
-        /* Spinner */
+        #logo {
+            position: absolute;
+            left: 50%;
+            top: 25vh;
+            transform: translate(-50%, -50%);
+        }
+
+        #center-ui {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         .spinner {
             height: 30px;
             width: 30px;
@@ -53,25 +63,28 @@
             border-radius: 100%;
         }
 
-        /* Status text */
+        @keyframes rotation {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         #status {
             font-weight: 700;
             color: #787878;
             text-align: center;
-        }
-
-        @keyframes rotation {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 
 <body>
     <div id="overlay">
-        <div class="spinner" id="spinner"></div>
-        <div id="status">Downloading...</div>
-        <progress hidden id="progress" max="100" value="0"></progress>
+        <img id="logo" src="{{LOGO}}" alt="Game logo">
+
+        <div id="center-ui">
+            <div class="spinner" id="spinner"></div>
+            <div id="status">Downloading...</div>
+            <progress hidden id="progress" max="100" value="0"></progress>
+        </div>
     </div>
 
     <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
